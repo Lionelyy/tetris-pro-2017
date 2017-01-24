@@ -20,6 +20,7 @@ public class ShapeController : MonoBehaviour
     private int _currentRotation = 0;
     private static int _rotateLeft =  90;
     private static int _rotateRight =  -90;
+    private bool _checkedRotationLanded = false;
 
     #endregion
 
@@ -46,8 +47,27 @@ public class ShapeController : MonoBehaviour
         // Stop all movement of the shapes while the grid is mid rotation
         if (GridManager.Instance.IsRotating)
         {
+            // We want to land the shape in case it's right above the ground
+            // so the shape won't slip after we rotate, we also check whether we
+            // already checked this since while rotating the shape stops moving
+            // and it's impossible to land, so it's just a waste to check every
+            // frame of the rotation
+            if (!_checkedRotationLanded)
+            {
+                if (HasLanded())
+                {
+                    GameManager.Instance.ShapeLanded();
+
+                    enabled = false;
+                }
+
+                _checkedRotationLanded = true;
+            }
+
             return;
         }
+
+        _checkedRotationLanded = false;
 
         // Move shape right
         if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
